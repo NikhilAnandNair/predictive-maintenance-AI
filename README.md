@@ -38,25 +38,27 @@ Type (L, M, H) — machine type
 
 ⚙️ Project Workflow
 1️⃣ Data Loading and Exploration
+# Load data
 data = pd.read_csv('ai4i2020.csv')
 print(data.head())
-print(data.info())
 
+# Basic exploration
+print(data.info())
+print(data.describe())
 
 Checked for missing values and data types
-
 Visualized feature distributions
 
 2️⃣ Preprocessing
+# Preprocess
 data = data.drop(['UDI', 'Product ID'], axis=1)
-data = pd.get_dummies(data, columns=['Type'])
-
+data = pd.get_dummies(data, columns=['Type'])  # encode categorical
 
 Removed irrelevant identifiers
-
 Converted categorical Type into numeric columns
 
 3️⃣ Feature and Target Split
+# Split data
 X = data.drop('Machine failure', axis=1)
 y = data['Machine failure']
 
@@ -65,31 +67,53 @@ from sklearn.model_selection import train_test_split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 5️⃣ Model Training
-from sklearn.ensemble import RandomForestClassifier
-model = RandomForestClassifier(class_weight='balanced', random_state=42)
+# Train a model
+model = RandomForestClassifier()
 model.fit(X_train, y_train)
 
 6️⃣ Evaluation
-from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
+# Evaluate
 y_pred = model.predict(X_test)
-
 print(classification_report(y_test, y_pred))
-ConfusionMatrixDisplay.from_estimator(model, X_test, y_test, display_labels=['No Failure', 'Failure'], cmap='Blues')
+print(confusion_matrix(y_test, y_pred))
+
+6️⃣ Visualization
+# --- Visualization ---
+importances = model.feature_importances_
+features = X.columns
+
+plt.figure(figsize=(10,6))
+plt.barh(features, importances)
+plt.xlabel("Feature Importance")
+plt.ylabel("Sensor Features")
+plt.title("Feature Importance for Predicting Engine Failure")
+plt.show()
+
+from sklearn.metrics import classification_report, confusion_matrix, ConfusionMatrixDisplay
+import matplotlib.pyplot as plt
+
+# Confusion Matrix
+# Print numeric results
+print(classification_report(y_test, y_pred))
+print(confusion_matrix(y_test, y_pred))
+
+# --- Visualization ---
+cm = confusion_matrix(y_test, y_pred)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['No Failure', 'Failure'])
+
+# Plot
+disp.plot(cmap='Blues', values_format='d')
+plt.title("Confusion Matrix - Machine Failure Prediction")
 plt.show()
 
 📈 Results
 
 Accuracy: ~96–98% (depending on random state)
-
 Precision & Recall: High for both classes
-
 Confusion Matrix:
 Visualized to show true vs. false predictions
-
 Insights:
-
 High torque and tool wear correlate strongly with machine failures
-
 Type H machines show slightly higher failure risk
 
 🧠 Key Learnings
